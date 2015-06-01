@@ -5,6 +5,7 @@
  * Annotations for thr framework.
  *
  * @author Hartorn
- *
+ * 
  */
-package org.bitbucket.hartorn.framework.annotations;
+package org.hartorn.htf.annotation;
+

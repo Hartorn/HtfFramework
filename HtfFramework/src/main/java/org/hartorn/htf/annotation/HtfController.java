@@ -1,23 +1,24 @@
-package org.bitbucket.hartorn.framework.annotations;
+package org.hartorn.htf.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.atteo.classindex.IndexAnnotated;
+
 /**
- * BaseUrl : annotation giving the path for the controller.
+ * Annotation marking the class as a controller.
  *
  * @author Hartorn
  *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface ControllerUrl {
+@IndexAnnotated
+public @interface HtfController {
     /**
      * Give the controller address url part.
-     *
-     * @return the url part.
      */
-    String adress();
+    String address() default "";
 }

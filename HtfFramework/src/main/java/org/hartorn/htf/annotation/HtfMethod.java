@@ -1,4 +1,4 @@
-package org.bitbucket.hartorn.framework.annotations;
+package org.hartorn.htf.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,15 +6,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * HttpVerb : annotation constraining the HTTP Verb able to call this method.
+ * MethodUrl : annotation giving the path for the controller.
  *
  * @author Hartorn
  *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface HttpVerb {
-
+public @interface HtfMethod {
     /**
      * Enumeration of the HttpVerbs (DELETE, GET, HEAD, OPTIONS, POST, PUT, TRACE).
      *
@@ -47,16 +46,15 @@ public @interface HttpVerb {
     }
 
     /**
-     * Give unique authorized HTTP verb.
+     * Give the method url part.
      *
-     * @return the verb.
      */
-    HttpVerbs verb();
+    String adress() default "";
 
     /**
      * Give authorized HTTP verbs.
      *
-     * @return the verbs
      */
-    HttpVerbs[] verbs();
+    HttpVerbs[] httpVerbs() default {};
+
 }
