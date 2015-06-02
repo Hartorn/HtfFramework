@@ -3,6 +3,8 @@ package org.hartorn.htf.handler.request;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -17,6 +19,7 @@ import org.hartorn.htf.annotation.HtfController;
 import org.hartorn.htf.annotation.HtfMethod.HttpVerbs;
 import org.hartorn.htf.exception.ImplementationException;
 import org.hartorn.htf.handler.path.UrlResolver;
+import org.hartorn.htf.util.JsonHelper;
 import org.hartorn.htf.util.Pair;
 
 /**
@@ -25,21 +28,21 @@ import org.hartorn.htf.util.Pair;
  * @author Hartorn
  *
  */
-public final class RequestHandler extends HttpServlet {
+public final class HtfRequestHandler extends HttpServlet {
     /**
      * Serial ID.
      */
     private static final long serialVersionUID = -6533912768946164886L;
     private static final Logger LOG = LogManager.getLogger();
 
-    private static final String SERVLET_INFO = "RequestHandler, part of Htf Framework (author Hartorn)";
+    private static final String SERVLET_INFO = "HtfRequestHandler, part of Htf Framework (author Hartorn)";
 
     private UrlResolver pathResolver;
 
     /**
      * Constructor.
      */
-    public RequestHandler() {
+    public HtfRequestHandler() {
         super();
     }
 
@@ -50,7 +53,7 @@ public final class RequestHandler extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return RequestHandler.SERVLET_INFO;
+        return HtfRequestHandler.SERVLET_INFO;
     }
 
     /*
@@ -60,6 +63,7 @@ public final class RequestHandler extends HttpServlet {
      */
     @Override
     public void init() throws ServletException {
+        HtfRequestHandler.LOG.info("HTF - Initialising ...");
         // Initialise the servlet resources
         final Set<Class<?>> controllers = AnnotationHelper.getAnnotatedClasses(HtfController.class);
         try {
@@ -67,6 +71,7 @@ public final class RequestHandler extends HttpServlet {
         } catch (final ImplementationException e) {
             throw new ServletException(e);
         }
+        HtfRequestHandler.LOG.info("HTF - Initialisation finished");
     }
 
     /*
@@ -124,35 +129,62 @@ public final class RequestHandler extends HttpServlet {
         try {
             this.handleRequest(verb, req, resp);
         } catch (final ImplementationException e) {
-            RequestHandler.LOG.error("Exception happened while handling request from {0} with HttpVerb {1}", req.getRequestURL(), verb.name());
-            RequestHandler.LOG.error(e);
+            HtfRequestHandler.LOG.error("Exception happened while handling request from [{}] with HttpVerb [{}]", req.getRequestURL(), verb.name());
+            HtfRequestHandler.LOG.error(e);
             throw new ServletException(e);
         }
     }
 
     private HtfResponse getHtfResponse(final Object controller, final Method method, final Object... methodParams) throws ImplementationException {
-        RequestHandler.LOG.debug("Invoking controller {0} with method {1}", controller.getClass().getCanonicalName(), method.getName());
+        HtfRequestHandler.LOG.debug("Invoking controller [{}] with method [{}]", controller.getClass().getCanonicalName(), method.getName());
 
         try {
             return (HtfResponse) method.invoke(controller, methodParams);
         } catch (final IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            RequestHandler.LOG.error(e);
+            HtfRequestHandler.LOG.error(e);
             throw new ImplementationException("Error while invocating controller", e);
         }
     }
 
-    private void handleRequest(final HttpVerbs verb, final HttpServletRequest req, final HttpServletResponse resp) throws ImplementationException {
-        RequestHandler.LOG.debug("Handling request from {0} with HttpVerb {1}", req.getRequestURL(), verb.name());
+    private void handleRequest(final HttpVerbs verb, final HttpServletRequest req, final HttpServletResponse resp) throws ImplementationException,
+    IOException {
+        HtfRequestHandler.LOG.debug("Handling request from [{}] with HttpVerb [{}]", req.getRequestURL(), verb.name());
 
         // 1 - Identify controller and method
         final Pair<Object, Method> ctrlMethod = this.pathResolver.resolveRequest(req, verb);
 
+        // 1 - Identify Content type, and build basics arguments
+        if ("application/json".equals(req.getContentType())) {
+            req.getParameterMap();
+        }
+
+        final Type[] args = ctrlMethod.right().getGenericParameterTypes();
+        Object argToCall = null;
+        for (final Type arg : args) {
+            HtfRequestHandler.LOG.debug("Type :{}", arg.getTypeName());
+            if (arg instanceof ParameterizedType) {
+                final ParameterizedType type = (ParameterizedType) arg;
+                HtfRequestHandler.LOG.debug("Parametized type :{}", type.getTypeName());
+                argToCall = JsonHelper.getObjectFromJson(req, type);
+            }
+
+            // ParameterizedTypeImpl typeImpl = new ParameterizedTypeImpl();
+            // typeImpl.
+            // final Type fooType = new TypeToken<Foo<Bar>>() {
+            // }.getType();
+            //
+            // }
+            // for (final Type t : argTypes) {
+            // HtfRequestHandler.LOG.debug("ArgType :{}", t.getTypeName());
+            // }
+
+        }
         // 3 - Get the answer
-        final HtfResponse htfResponse = this.getHtfResponse(ctrlMethod.left(), ctrlMethod.right());
+        final HtfResponse htfResponse = this.getHtfResponse(ctrlMethod.left(), ctrlMethod.right(), argToCall);
 
         // 4 - Write the answer
-        RequestHandler.LOG.debug("Writing response for request from {0} with HttpVerb {1}", req.getRequestURL(), verb.name());
+        HtfRequestHandler.LOG.debug("Writing response for request from [{}] with HttpVerb [{}]", req.getRequestURL(), verb.name());
         htfResponse.doWriteResponse(req, resp);
-        RequestHandler.LOG.debug("Finished handling request from {0} with HttpVerb {1}", req.getRequestURL(), verb.name());
+        HtfRequestHandler.LOG.debug("Finished handling request from [{}] with HttpVerb [{}]", req.getRequestURL(), verb.name());
     }
 }

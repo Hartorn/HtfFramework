@@ -1,10 +1,10 @@
 package org.hartorn.htf.handler.path;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,7 +21,7 @@ import org.hartorn.htf.util.Pair;
 import org.hartorn.htf.util.StringUtil;
 
 /**
- * UrlResolver : resolve the path, and try to identify the controller and method to call.
+ * Class use to resolve the url path for a request, and try to identify the controller and method to call.
  *
  * @author Hartorn
  *
@@ -42,7 +42,7 @@ public final class UrlResolver {
      *             System exception
      */
     public UrlResolver(final Set<Class<?>> controllers) throws ImplementationException {
-        this.instanceMap = new HashMap<Class<?>, Object>();
+        this.instanceMap = new ConcurrentHashMap<Class<?>, Object>();
         this.urlTree = UrlTree.newUrlTree();
         this.initialiseUrlTree(controllers);
     }
@@ -59,7 +59,7 @@ public final class UrlResolver {
      *             Exception thrown
      */
     public Pair<Object, Method> resolveRequest(final HttpServletRequest request, final HttpVerbs verb) throws ImplementationException {
-        UrlResolver.LOG.debug("Resolving the url from {0} with HttpVerb {1}", request.getRequestURL(), verb.name());
+        UrlResolver.LOG.debug("HTF - Resolving the url from [{}] with HttpVerb [{}]", request.getRequestURL(), verb.name());
 
         return this.resolveUrl(StringUtil.stripSlash(this.getControllerUrl(request)), verb);
     }
@@ -75,6 +75,9 @@ public final class UrlResolver {
 
     private void checkMethodReturnType(final Method method) throws ImplementationException {
         final Class<?> rtnClass = method.getReturnType();
+        if (HtfResponse.class.equals(rtnClass)) {
+            return;
+        }
         final Class<?>[] iClasses = rtnClass.getInterfaces();
         for (final Class<?> iClass : iClasses) {
             if (iClass.equals(HtfResponse.class)) {
@@ -133,7 +136,7 @@ public final class UrlResolver {
     private Pair<Object, Method> resolveUrl(final String fullUrl, final HttpVerbs verb) throws ImplementationException {
         final Pair<Class<?>, Method> result = this.urlTree.resolveUrl(fullUrl, verb);
         if (result == null) {
-            throw new ImplementationException("No method or controller found for this url");
+            throw new ImplementationException("No method or controller found for this url [" + fullUrl + "] and this verb [" + verb.name() + "]");
         }
         final Class<?> controllerClass = result.left();
         Object controllerInstance = this.instanceMap.get(controllerClass);

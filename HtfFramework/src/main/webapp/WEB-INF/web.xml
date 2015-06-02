@@ -2,12 +2,12 @@
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" version="3.1">
   <display-name>HtfFramework</display-name>
   <servlet>
-    <servlet-name>RequestHandlerServlet</servlet-name>
-    <servlet-class>org.hartorn.htf.handler.request.RequestHandler</servlet-class>
+    <servlet-name>HtfRequestHandler</servlet-name>
+    <servlet-class>org.hartorn.htf.handler.request.HtfRequestHandler</servlet-class>
     <load-on-startup>1</load-on-startup>
   </servlet>
   <servlet-mapping>
-    <servlet-name>RequestHandlerServlet</servlet-name>
+    <servlet-name>HtfRequestHandler</servlet-name>
     <url-pattern>/*</url-pattern>
   </servlet-mapping>
   

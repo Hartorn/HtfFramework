@@ -72,7 +72,7 @@ public enum StringUtil {
     public static String stripSlash(final String urlPart) {
         final String url = StringUtil.emptyIfNull(urlPart).trim().toLowerCase();
         if (url.isEmpty()) {
-            return null;
+            return url;
         }
         int beginIndex = 0;
         int endIndex = urlPart.length();

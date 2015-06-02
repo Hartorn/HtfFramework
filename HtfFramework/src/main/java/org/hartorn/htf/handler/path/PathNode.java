@@ -43,7 +43,7 @@ final class PathNode implements UrlTree {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.hartorn.htf.handler.path.UrlNode#addChild(java.lang.String)
      */
     @Override
@@ -55,7 +55,7 @@ final class PathNode implements UrlTree {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.hartorn.htf.handler.path.UrlNode#addMethod(java.lang.reflect.Method, org.hartorn.htf.annotation.HttpVerb.HttpVerbs[])
      */
     @Override
@@ -72,7 +72,7 @@ final class PathNode implements UrlTree {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.hartorn.htf.handler.path.UrlNode#getChild(java.lang.String)
      */
     @Override
@@ -85,11 +85,14 @@ final class PathNode implements UrlTree {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.hartorn.htf.handler.path.UrlNode#getControllerAndMethod(org.hartorn.htf.annotation.ControllerMethod.HttpVerbs)
      */
     @Override
     public Pair<Class<?>, Method> getControllerAndMethod(final HttpVerbs verb) {
+        if (this.callableMethods == null) {
+            return null;
+        }
         Pair<Class<?>, Method> res = this.callableMethods.get(verb);
         if (res == null) {
             res = this.callableMethods.get(null);
@@ -99,7 +102,7 @@ final class PathNode implements UrlTree {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.hartorn.htf.handler.path.UrlNode#getUrlPart()
      */
     @Override
@@ -109,7 +112,7 @@ final class PathNode implements UrlTree {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.hartorn.htf.handler.path.UrlNode#makeUnmodifiable()
      */
     @Override
@@ -127,13 +130,15 @@ final class PathNode implements UrlTree {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.hartorn.htf.handler.path.UrlTree#registerNode(java.lang.String, java.lang.Class, java.lang.reflect.Method,
      * org.hartorn.htf.annotation.HttpVerb.HttpVerbs[])
      */
     @Override
     public void registerNode(final String fullUrl, final Class<?> controller, final Method method, final HttpVerbs[] verbs)
             throws ImplementationException {
+        PathNode.LOG.debug("HTF - Registering EndPoint - URL:{} Controller:{} Method:{}", fullUrl, controller.getCanonicalName(), method.getName());
+
         final String[] pathParts = fullUrl.split(PathNode.SLASH);
         UrlNode parent = this;
         UrlNode child = null;
@@ -146,15 +151,12 @@ final class PathNode implements UrlTree {
         }
         // At the end, parent == child. It is the last node, where the method should be registered.
         child.addMethod(Pair.of(controller, method), verbs);
-        PathNode.LOG.debug("EndPoint registered URL:{0} Controller:{1} Method:{2}", fullUrl, controller.getCanonicalName(), method.getName());
-
-        System.out.println("Node registered url:" + fullUrl + " Controller:" + controller.getSimpleName() + " HttpVerb:" + verbs + " Method:"
-                + method.getName());
+        PathNode.LOG.debug("HTF - EndPoint registered - URL:{} Controller:{} Method:{}", fullUrl, controller.getCanonicalName(), method.getName());
     }
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.hartorn.htf.handler.path.UrlTree#resolveUrl(java.lang.String, org.hartorn.htf.annotation.ControllerMethod.HttpVerbs)
      */
     @Override

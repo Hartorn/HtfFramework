@@ -32,7 +32,7 @@ filePattern="${log-path}/htf-error-%d{yyyy-MM-dd}.log">
 <appender-ref ref="error-log" level="error"/>
 <appender-ref ref="console-log" level="debug"/>
 </Logger>
-<Root level="info" additivity="false">
+<Root level="debug" additivity="false">
 <AppenderRef ref="console-log"/>
 </Root>
 </Loggers>
