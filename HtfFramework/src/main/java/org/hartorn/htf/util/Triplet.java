@@ -124,7 +124,7 @@ public final class Triplet<L, M, R> {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.lang.Object#toString()
      */
     @Override

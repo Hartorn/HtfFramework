@@ -20,8 +20,12 @@ public interface HtfResponse {
      * @param response
      *            the http response
      *
+     * @throws UserException
+     *             Exception from misuses by the user
+     *
      * @throws ImplementationException
-     *             Exception IOException
+     *             Technical Exception
+     *
      */
     void doWriteResponse(final HttpServletRequest request, final HttpServletResponse response) throws ImplementationException;
 }

@@ -105,7 +105,7 @@ public final class UrlResolver {
         final String[] leftUrl = dataAndUrlLeftOvers.right();
         final ControllerData ctrlData = dataAndUrlLeftOvers.left();
         Pair<Class<?>, Method> result;
-        if (ctrlData.getData() != null) {
+        if ((ctrlData != null) && (ctrlData.getData() != null)) {
             result = ctrlData.getControllerMethodPair(verb);
         } else {
             throw new ImplementationException("HTF - ControllerData with null attribute");

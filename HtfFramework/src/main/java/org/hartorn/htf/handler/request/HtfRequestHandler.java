@@ -8,258 +8,142 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hartorn.htf.annotation.AnnotationHelper;
 import org.hartorn.htf.annotation.FromUrl;
-import org.hartorn.htf.annotation.HtfController;
-import org.hartorn.htf.annotation.HtfMethod.HttpVerbs;
 import org.hartorn.htf.exception.ImplementationException;
+import org.hartorn.htf.exception.NotYetImplementedException;
+import org.hartorn.htf.exception.UserException;
 import org.hartorn.htf.handler.path.UrlResolver;
-import org.hartorn.htf.util.Pair;
+import org.hartorn.htf.util.JsonHelper;
 import org.hartorn.htf.util.StringUtil;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 
 /**
- * Main class for handling the request, directing to right method and controller.
+ * Class to handle receiving the request, and sending the response.
  *
  * @author Hartorn
  *
  */
-public final class HtfRequestHandler extends HttpServlet {
-    /**
-     * Serial ID.
-     */
-    private static final long serialVersionUID = -6533912768946164886L;
+public enum HtfRequestHandler {
+    ;
     private static final Logger LOG = LogManager.getLogger();
 
-    private static final String SERVLET_INFO = "HtfRequestHandler, part of Htf Framework (author Hartorn)";
-
-    private UrlResolver pathResolver;
-
-    /**
-     * Constructor.
-     */
-    public HtfRequestHandler() {
-        super();
+    private HtfRequestHandler() {
+        // Private constructor.
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.servlet.GenericServlet#getServletInfo()
-     */
-    @Override
-    public String getServletInfo() {
-        return HtfRequestHandler.SERVLET_INFO;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.servlet.GenericServlet#init()
-     */
-    @Override
-    public void init() throws ServletException {
-        HtfRequestHandler.LOG.info("HTF - Initialising ...");
-        // Initialise the servlet resources
-        final Set<Class<?>> controllers = AnnotationHelper.getAnnotatedClasses(HtfController.class);
-        try {
-            this.pathResolver = new UrlResolver(controllers);
-        } catch (final ImplementationException e) {
-            throw new ServletException(e);
-        }
-        HtfRequestHandler.LOG.info("HTF - Initialisation finished");
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.servlet.http.HttpServlet#doDelete(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
-     */
-    @Override
-    protected void doDelete(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        this.doHandleRequest(HttpVerbs.DELETE, req, resp);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
-     */
-    @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        this.doHandleRequest(HttpVerbs.GET, req, resp);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.servlet.http.HttpServlet#doHead(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
-     */
-    @Override
-    protected void doHead(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        this.doHandleRequest(HttpVerbs.HEAD, req, resp);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
-     */
-    @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        this.doHandleRequest(HttpVerbs.POST, req, resp);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
-     */
-    @Override
-    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        this.doHandleRequest(HttpVerbs.PUT, req, resp);
-    }
-
-    private void doHandleRequest(final HttpVerbs verb, final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-            IOException {
-        try {
-            this.handleRequest(verb, req, resp);
-        } catch (final ImplementationException e) {
-            HtfRequestHandler.LOG.error("Exception happened while handling request from [{}] with HttpVerb [{}]", req.getRequestURL(), verb.name());
-            HtfRequestHandler.LOG.error(e);
-            throw new ServletException(e);
-        }
-    }
-
-    private HtfResponse getHtfResponse(final Object controller, final Method method, final Object... methodParams) throws ImplementationException {
+    public static HtfResponse getHtfResponse(final Object controller, final Method method, final Object... methodParams)
+            throws ImplementationException {
         HtfRequestHandler.LOG.debug("HTF - Invoking controller [{}] with method [{}]", controller.getClass().getCanonicalName(), method.getName());
 
         try {
             return (HtfResponse) method.invoke(controller, methodParams);
-        } catch (final IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            HtfRequestHandler.LOG.error(e);
+        } catch (final IllegalAccessException | IllegalArgumentException e) {
             throw new ImplementationException("Error while invocating controller", e);
+        } catch (final InvocationTargetException e) {
+            final Throwable cause = e.getCause();
+            if ((cause != null) && (cause instanceof UserException)) {
+                return HtfRequestHandler.handleUserException((UserException) cause);
+            } else {
+                throw new ImplementationException(cause != null ? cause : e);
+            }
         }
     }
 
-    private Object[] getMethodParameters(final Method method, final HttpServletRequest request) throws IOException, ImplementationException {
-        final Type[] paramTypes = method.getGenericParameterTypes();
-        final Annotation[][] paramAnnotations = method.getParameterAnnotations();
+    public static Object[] getMethodParametersFromRequest(final Method method, final HttpServletRequest request) throws ImplementationException {
+        Object[] params;
+        // 2 - Identify Content type, and build basics arguments
+        switch (StringUtil.emptyIfNull(request.getContentType())) {
+            case "application/json":
+                params = HtfRequestHandler.getMethodParametersFromJsonRequest(method, request);
+                break;
+            default:
+                throw new ImplementationException("Cannot handle this kind of content type " + request.getContentType());
+        }
 
+        return params;
+    }
+
+    private static void addAllParameters(final List<Object> params, final Type[] paramTypes, final String[] pathParts) {
+        for (int indexParam = 0; indexParam < paramTypes.length; indexParam++) {
+            final Type type = paramTypes[indexParam];
+            params.add(JsonHelper.getPrimitiveObjectFromString(pathParts[paramTypes.length - 1 - indexParam], type));
+        }
+    }
+
+    private static Object[] getMethodParametersFromJsonRequest(final Method method, final HttpServletRequest request) throws ImplementationException {
+        final Type[] paramTypes = method.getGenericParameterTypes();
+        // If no parameters, no parse or anything
         if (paramTypes.length == 0) {
-            // If no parameters, no no parse or anything
             return null;
         }
-        final Gson gson = new Gson();
+        final Annotation[][] paramAnnotations = method.getParameterAnnotations();
 
         final List<Object> params = new ArrayList<Object>();
         final int nbAnnotatedParams = AnnotationHelper.getNumberOfAnnotatedParameters(method, FromUrl.class);
+        // Initialise pathPArts and offset
         String[] pathParts = null;
+        int offset = 0;
         if (nbAnnotatedParams != 0) {
             pathParts = StringUtil.strip(UrlResolver.getControllerUrl(request), '/').split("/");
+            // Calculate offset for urlParams
+            offset = paramTypes.length - nbAnnotatedParams;
         }
         // If only params from url
         if (nbAnnotatedParams == paramTypes.length) {
-            for (int indexParam = 0; indexParam < paramTypes.length; indexParam++) {
-                final Type type = paramTypes[indexParam];
-                params.add(gson.fromJson(pathParts[paramTypes.length - 1 - indexParam], type));
-            }
-            return params.toArray();
-        }
+            HtfRequestHandler.addAllParameters(params, paramTypes, pathParts);
+        } else {
 
-        // If mixed
-        final JsonParser jsonParser = new JsonParser();
-        final Reader reader = request.getReader();
-        final JsonElement jsonTree = jsonParser.parse(reader);
-        int nbUrlParams = 0;
-        int nbRqParams = 0;
+            // If mixed
+            final JsonParser jsonParser = new JsonParser();
+            // Try-with for the request reader
+            try (final Reader reader = request.getReader()) {
+                final JsonElement jsonTree = jsonParser.parse(reader);
+                int nbUrlParams = 0;
+                int nbRqParams = 0;
+                // For each needed params
+                for (int indexParam = 0; indexParam < paramTypes.length; indexParam++) {
+                    // You get the type
+                    final Type type = paramTypes[indexParam];
+                    // If parameter is to get from the url
+                    if (AnnotationHelper.containsAnnotation(paramAnnotations[indexParam], FromUrl.class)) {
+                        if (nbUrlParams > paramTypes.length) {
+                            throw new ImplementationException("Too many parameters from url");
+                        }
+                        params.add(JsonHelper.getPrimitiveObjectFromString(pathParts[offset + nbUrlParams], type));
+                        nbUrlParams++;
+                    } else {
+                        // Else the parameter is from the request body
 
-        for (int indexParam = 0; indexParam < paramTypes.length; indexParam++) {
-            final Type type = paramTypes[indexParam];
-            if (AnnotationHelper.containsAnnotation(paramAnnotations[indexParam], FromUrl.class)) {
-                params.add(gson.fromJson(new JsonPrimitive(pathParts[paramTypes.length - 1 - nbUrlParams]), type));
-                nbUrlParams++;
-            } else {
-                if (!jsonTree.isJsonArray() && (nbRqParams != 0)) {
-                    throw new ImplementationException("Error while getting method parameters");
-                } else if (!jsonTree.isJsonArray()) {
-                    params.add(gson.fromJson(jsonTree, type));
-                } else {
-                    final JsonArray jsonArray = (JsonArray) jsonTree;
-                    params.add(gson.fromJson(jsonArray.get(nbRqParams), type));
+                        // If Json is an object, primitive or null, must have only one body parameter
+                        if (!jsonTree.isJsonArray() && (nbRqParams != 0)) {
+                            throw new ImplementationException("Too many method parameters : only one Json object >" + jsonTree.toString());
+                        } else if (!jsonTree.isJsonArray()) {
+                            // Get unique parameter (or else exception for next one)
+                            params.add(JsonHelper.getObjectFromJsonElement(jsonTree, type));
+                        } else {
+                            final JsonArray jsonArray = (JsonArray) jsonTree;
+                            params.add(JsonHelper.getObjectFromJsonElement(jsonArray.get(nbRqParams), type));
+                        }
+                        nbRqParams++;
+                    }
                 }
-                nbRqParams++;
+            } catch (final IOException e) {
+                throw new ImplementationException(e);
             }
         }
         return params.toArray();
     }
 
-    private void handleRequest(final HttpVerbs verb, final HttpServletRequest req, final HttpServletResponse resp) throws ImplementationException,
-    IOException {
-        HtfRequestHandler.LOG.debug("HTF - Handling request from [{}] with HttpVerb [{}]", req.getRequestURL(), verb.name());
-
-        // 1 - Identify controller and method
-        final Pair<Object, Method> ctrlMethod = this.pathResolver.resolveRequest(req, verb);
-
-        final Method method = ctrlMethod.right();
-        final Object ctrl = ctrlMethod.left();
-        Object[] argToCall = null;
-
-        // 2 - Identify Content type, and build basics arguments
-        if ("application/json".equals(req.getContentType())) {
-            req.getParameterMap();
-            argToCall = this.getMethodParameters(method, req);
-        }
-
-        // final Type[] args = ctrlMethod.right().getGenericParameterTypes();
-        // final AnnotatedType[] annArgs = ctrlMethod.right().getAnnotatedParameterTypes();
-        // for (final AnnotatedType type : annArgs) {
-        // if (type.isAnnotationPresent(FromUrl.class)) {
-        // System.out.println("ANNOTATION");
-        // }
-        // }
-        // final Annotation[][] annotations = ctrlMethod.right().getParameterAnnotations();
-        // Object argToCall = null;
-        // for (final Type arg : args) {
-        // HtfRequestHandler.LOG.debug("Type :{}", arg.getTypeName());
-        // if (arg instanceof ParameterizedType) {
-        // final ParameterizedType type = (ParameterizedType) arg;
-        // HtfRequestHandler.LOG.debug("Parametized type :{}", type.getTypeName());
-        // argToCall = JsonHelper.getObjectFromJson(req, type);
-        // }
-
-        // ParameterizedTypeImpl typeImpl = new ParameterizedTypeImpl();
-        // typeImpl.
-        // final Type fooType = new TypeToken<Foo<Bar>>() {
-        // }.getType();
-        //
-        // }
-        // for (final Type t : argTypes) {
-        // HtfRequestHandler.LOG.debug("ArgType :{}", t.getTypeName());
-        // }
-
-        // }
-        // 3 - Get the answer
-        final HtfResponse htfResponse = this.getHtfResponse(ctrl, method, argToCall);
-
-        // 4 - Write the answer
-        HtfRequestHandler.LOG.debug("HTF - Writing response for request from [{}] with HttpVerb [{}]", req.getRequestURL(), verb.name());
-        htfResponse.doWriteResponse(req, resp);
-        HtfRequestHandler.LOG.debug("HTF - Finished handling request from [{}] with HttpVerb [{}]", req.getRequestURL(), verb.name());
+    private static HtfResponse handleUserException(final UserException e) {
+        throw new NotYetImplementedException("Handling of User Exception is not yet done");
     }
-
 }

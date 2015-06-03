@@ -1,12 +1,10 @@
 package org.hartorn.htf.util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.lang.reflect.Type;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 
 /**
  * Class gathering all the utility methods for handling JSON data.
@@ -16,19 +14,36 @@ import com.google.gson.Gson;
  */
 public enum JsonHelper {
     ;
+    private static final Gson GSON = JsonHelper.newGson();
 
     private JsonHelper() {
         // private constructor, for helper class.
     }
 
-    public static Object getObjectFromJson(final HttpServletRequest request, final Type t) throws IOException {
-        BufferedReader reader = null;
-        try {
-            reader = request.getReader();
-            return JsonHelper.newGson().fromJson(reader, t);
-        } finally {
-            reader.close();
-        }
+    /**
+     * Build an object of class type from this json element.
+     *
+     * @param jsonElt
+     *            the source element
+     * @param type
+     *            the type of the wanted object
+     * @return the new object
+     */
+    public static Object getObjectFromJsonElement(final JsonElement jsonElt, final Type type) {
+        return JsonHelper.GSON.fromJson(jsonElt, type);
+    }
+
+    /**
+     * Build an object of class type from this json primitive.
+     *
+     * @param json
+     *            the source element
+     * @param type
+     *            the type of the wanted object
+     * @return the new object
+     */
+    public static Object getPrimitiveObjectFromString(final String json, final Type type) {
+        return JsonHelper.GSON.fromJson(new JsonPrimitive(json), type);
     }
 
     private static Gson newGson() {

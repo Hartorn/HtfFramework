@@ -123,7 +123,7 @@ public enum AnnotationHelper {
 
     /**
      * Return the number of parameters with the given annotation.
-     * 
+     *
      * @param toCheck
      *            the method to check
      * @param annotationClass
