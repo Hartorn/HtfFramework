@@ -1,10 +1,17 @@
 package org.hartorn.htf.util;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.hartorn.htf.exception.ImplementationException;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonWriter;
 
 /**
  * Class gathering all the utility methods for handling JSON data.
@@ -46,7 +53,31 @@ public enum JsonHelper {
         return JsonHelper.GSON.fromJson(new JsonPrimitive(json), type);
     }
 
+    /**
+     * Write the given object to the reponse, without losing any generic information.
+     *
+     * @param object
+     *            the given object
+     * @param response
+     *            the response
+     * 
+     * @param <D>
+     *            type of the object (including generics)
+     * @throws ImplementationException
+     *             Technical Exception, caused by IOException
+     */
+    public static <D> void writeObjectToResponse(final D object, final HttpServletResponse response) throws ImplementationException {
+        try (JsonWriter jsonWriter = new JsonWriter(response.getWriter())) {
+            final Type answerType = new TypeToken<D>() {
+            }.getType();
+            JsonHelper.GSON.toJson(object, answerType, jsonWriter);
+        } catch (final IOException e) {
+            throw new ImplementationException(e);
+        }
+    }
+
     private static Gson newGson() {
         return new Gson();
     }
+
 }

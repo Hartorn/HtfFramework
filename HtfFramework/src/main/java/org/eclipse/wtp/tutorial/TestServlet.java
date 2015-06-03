@@ -1,7 +1,9 @@
 package org.eclipse.wtp.tutorial;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.servlet.http.HttpServlet;
 
@@ -11,6 +13,7 @@ import org.hartorn.htf.annotation.HtfMethod;
 import org.hartorn.htf.annotation.HtfMethod.HttpVerbs;
 import org.hartorn.htf.handler.request.DebugResponse;
 import org.hartorn.htf.handler.request.HtfResponse;
+import org.hartorn.htf.handler.request.JsonResponse;
 
 /**
  * TestServlet : Servlet used for testing.
@@ -21,7 +24,7 @@ import org.hartorn.htf.handler.request.HtfResponse;
 @HtfController(address = "/test/bla")
 public final class TestServlet extends HttpServlet {
     public class Truc {
-        int num;
+        Integer num;
         BigDecimal sum;
         String bla;
     }
@@ -87,5 +90,21 @@ public final class TestServlet extends HttpServlet {
             System.out.println();
         }
         return new DebugResponse();
+    }
+
+    @HtfMethod(address = "/test7", httpVerbs = { HttpVerbs.GET, HttpVerbs.POST })
+    public HtfResponse test7(@FromUrl final int id, final Collection<Truc> bla, final Truc trucMuche) {
+        for (final Truc truc : bla) {
+            System.out.println("num:" + String.valueOf(truc.num));
+            System.out.println("bla:" + String.valueOf(truc.bla));
+            System.out.println("sum:" + String.valueOf(truc.sum));
+            System.out.println();
+        }
+        System.out.println("Id :" + id);
+        final List<Truc> trucList = new ArrayList<Truc>();
+        trucList.addAll(bla);
+        trucList.add(trucMuche);
+
+        return new JsonResponse<List<Truc>>(trucList);
     }
 }

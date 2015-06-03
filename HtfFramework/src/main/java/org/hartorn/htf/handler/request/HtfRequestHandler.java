@@ -60,13 +60,21 @@ public enum HtfRequestHandler {
 
     public static Object[] getMethodParametersFromRequest(final Method method, final HttpServletRequest request) throws ImplementationException {
         Object[] params;
-        // 2 - Identify Content type, and build basics arguments
-        switch (StringUtil.emptyIfNull(request.getContentType())) {
-            case "application/json":
-                params = HtfRequestHandler.getMethodParametersFromJsonRequest(method, request);
-                break;
-            default:
-                throw new ImplementationException("Cannot handle this kind of content type " + request.getContentType());
+        try {
+            // 2 - Identify Content type, and build basics arguments
+            switch (StringUtil.emptyIfNull(request.getContentType())) {
+                case "":
+                    // fallthrough
+                    // Case of GET and DELETE
+                case "application/json":
+                    params = HtfRequestHandler.getMethodParametersFromJsonRequest(method, request);
+                    break;
+                default:
+                    throw new ImplementationException("Cannot handle this kind of content type " + request.getContentType());
+            }
+        } catch (final RuntimeException e) {
+            // From unchecked to checked Exception
+            throw new ImplementationException(e);
         }
 
         return params;
@@ -95,7 +103,7 @@ public enum HtfRequestHandler {
         if (nbAnnotatedParams != 0) {
             pathParts = StringUtil.strip(UrlResolver.getControllerUrl(request), '/').split("/");
             // Calculate offset for urlParams
-            offset = paramTypes.length - nbAnnotatedParams;
+            offset = pathParts.length - nbAnnotatedParams;
         }
         // If only params from url
         if (nbAnnotatedParams == paramTypes.length) {
@@ -126,7 +134,7 @@ public enum HtfRequestHandler {
                         // If Json is an object, primitive or null, must have only one body parameter
                         if (!jsonTree.isJsonArray() && (nbRqParams != 0)) {
                             throw new ImplementationException("Too many method parameters : only one Json object >" + jsonTree.toString());
-                        } else if (!jsonTree.isJsonArray()) {
+                        } else if (!jsonTree.isJsonArray() || ((paramTypes.length - nbAnnotatedParams) == 1)) {
                             // Get unique parameter (or else exception for next one)
                             params.add(JsonHelper.getObjectFromJsonElement(jsonTree, type));
                         } else {

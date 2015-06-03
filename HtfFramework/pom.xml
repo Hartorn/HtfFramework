@@ -14,18 +14,26 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
-					<annotationProcessors>
-						<annotationProcessor>
-							org.atteo.classindex.processor.ClassIndexProcessor
-						</annotationProcessor>
-					</annotationProcessors>
+<!-- 					<annotationProcessors> -->
+<!-- 						<annotationProcessor> -->
+<!-- 							org.atteo.classindex.processor.ClassIndexProcessor -->
+<!-- 						</annotationProcessor> -->
+<!-- 					</annotationProcessors> -->
 
 					<useIncrementalCompilation>false</useIncrementalCompilation>
-					<verbose>true</verbose>
 					<showWarnings>true</showWarnings>
 					<showDeprecation>true></showDeprecation>
-<!-- 					<proc>only</proc> -->
+					<!-- <proc>only</proc> -->
 					<!-- <compilerArgument>-proc:none</compilerArgument> -->
+				</configuration>
+			</plugin>
+			<!-- For Maven Tomcat Plugin -->
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat7-maven-plugin</artifactId>
+				<version>2.2</version>
+				<configuration>
+					<path>/CounterWebApp</path>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -35,6 +43,7 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.1.0</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
