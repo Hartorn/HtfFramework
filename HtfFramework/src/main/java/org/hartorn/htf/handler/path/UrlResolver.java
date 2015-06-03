@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hartorn.htf.annotation.AnnotationHelper;
+import org.hartorn.htf.annotation.FromUrl;
 import org.hartorn.htf.annotation.HtfController;
 import org.hartorn.htf.annotation.HtfMethod;
 import org.hartorn.htf.annotation.HtfMethod.HttpVerbs;
@@ -30,7 +31,7 @@ public final class UrlResolver {
     private static final char SLASH_CHAR = '/';
     private static final Logger LOG = LogManager.getLogger();
 
-    private final UrlTree urlTree;
+    private final HtfTree<ControllerData> tree;
     private final Map<Class<?>, Object> instanceMap;
 
     /**
@@ -43,8 +44,19 @@ public final class UrlResolver {
      */
     public UrlResolver(final Set<Class<?>> controllers) throws ImplementationException {
         this.instanceMap = new ConcurrentHashMap<Class<?>, Object>();
-        this.urlTree = UrlTree.newUrlTree();
+        this.tree = new GenericTree<ControllerData>(UrlResolver.SLASH_CHAR);
         this.initialiseUrlTree(controllers);
+    }
+
+    /**
+     * Method giving the url after the context path.
+     *
+     * @param request
+     *            the http request
+     * @return the part of the url after the context path
+     */
+    public static String getControllerUrl(final HttpServletRequest request) {
+        return request.getRequestURI().replaceFirst(Matcher.quoteReplacement(request.getContextPath()), StringUtil.EMPTY);
     }
 
     /**
@@ -61,14 +73,14 @@ public final class UrlResolver {
     public Pair<Object, Method> resolveRequest(final HttpServletRequest request, final HttpVerbs verb) throws ImplementationException {
         UrlResolver.LOG.debug("HTF - Resolving the url from [{}] with HttpVerb [{}]", request.getRequestURL(), verb.name());
 
-        return this.resolveUrl(StringUtil.stripSlash(this.getControllerUrl(request)), verb);
+        return this.resolveUrl(StringUtil.stripAndToLower(UrlResolver.getControllerUrl(request), UrlResolver.SLASH_CHAR), verb);
     }
 
     private String buildUrl(final String ctrlPart, final String methodPart) {
         final StringBuilder url = new StringBuilder();
-        url.append(StringUtil.stripSlash(ctrlPart));
+        url.append(StringUtil.stripAndToLower(ctrlPart, UrlResolver.SLASH_CHAR));
         url.append(UrlResolver.SLASH_CHAR);
-        url.append(StringUtil.stripSlash(methodPart));
+        url.append(StringUtil.stripAndToLower(methodPart, UrlResolver.SLASH_CHAR));
 
         return url.toString();
     }
@@ -86,11 +98,36 @@ public final class UrlResolver {
         }
         throw new ImplementationException("Method:" + method.getName() + " Return type:" + rtnClass.getCanonicalName() + " does not implement "
                 + HtfResponse.class.getCanonicalName());
-
     }
 
-    private String getControllerUrl(final HttpServletRequest request) {
-        return request.getRequestURI().replaceFirst(Matcher.quoteReplacement(request.getContextPath()), StringUtil.EMPTY);
+    private Pair<Class<?>, Method> checkUrlResolution(final Pair<ControllerData, String[]> dataAndUrlLeftOvers, final HttpVerbs verb)
+            throws ImplementationException {
+        final String[] leftUrl = dataAndUrlLeftOvers.right();
+        final ControllerData ctrlData = dataAndUrlLeftOvers.left();
+        Pair<Class<?>, Method> result;
+        if (ctrlData.getData() != null) {
+            result = ctrlData.getControllerMethodPair(verb);
+        } else {
+            throw new ImplementationException("HTF - ControllerData with null attribute");
+        }
+        final int nbAnnotations = AnnotationHelper.getNumberOfAnnotatedParameters(result.right(), FromUrl.class);
+        if (nbAnnotations != leftUrl.length) {
+            throw new ImplementationException("HTF - Cannot resolve url");
+        }
+        final Pair<Class<?>, Method> toReturn = ctrlData.getControllerMethodPair(verb);
+        if (toReturn == null) {
+            throw new ImplementationException("HTF - Method cannot be invoked with given verb");
+        }
+        return toReturn;
+    }
+
+    private Object getControllerInstance(final Class<?> controllerClass) throws ImplementationException {
+        Object controllerInstance = this.instanceMap.get(controllerClass);
+        if (controllerInstance == null) {
+            controllerInstance = this.newInstanceOfController(controllerClass);
+            this.instanceMap.put(controllerClass, controllerInstance);
+        }
+        return controllerInstance;
     }
 
     private void initialiseUrlTree(final Set<Class<?>> controllers) throws ImplementationException {
@@ -120,10 +157,10 @@ public final class UrlResolver {
         // Check the method return type
         this.checkMethodReturnType(method);
         // Build the full url
-        final String url = this.buildUrl(ctrlAnnotation.address(), methodAnnotation.adress());
+        final String url = this.buildUrl(ctrlAnnotation.address(), methodAnnotation.address());
 
         // Register the node
-        this.urlTree.registerNode(url, ctrlClass, method, methodAnnotation.httpVerbs());
+        this.tree.registerData(url, new ControllerData(ctrlClass, method, methodAnnotation.httpVerbs()));
     }
 
     private void registerControllerMethods(final Class<?> ctrlClass, final HtfController ctrlAnnotation) throws ImplementationException {
@@ -134,16 +171,8 @@ public final class UrlResolver {
     }
 
     private Pair<Object, Method> resolveUrl(final String fullUrl, final HttpVerbs verb) throws ImplementationException {
-        final Pair<Class<?>, Method> result = this.urlTree.resolveUrl(fullUrl, verb);
-        if (result == null) {
-            throw new ImplementationException("No method or controller found for this url [" + fullUrl + "] and this verb [" + verb.name() + "]");
-        }
-        final Class<?> controllerClass = result.left();
-        Object controllerInstance = this.instanceMap.get(controllerClass);
-        if (controllerInstance == null) {
-            controllerInstance = this.newInstanceOfController(controllerClass);
-            this.instanceMap.put(controllerClass, controllerInstance);
-        }
-        return Pair.of(controllerInstance, result.right());
+        final Pair<Class<?>, Method> result = this.checkUrlResolution(this.tree.tryToResolve(fullUrl), verb);
+
+        return Pair.of(this.getControllerInstance(result.left()), result.right());
     }
 }

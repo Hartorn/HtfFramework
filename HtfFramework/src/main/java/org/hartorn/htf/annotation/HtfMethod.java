@@ -49,7 +49,7 @@ public @interface HtfMethod {
      * Give the method url part.
      *
      */
-    String adress() default "";
+    String address() default "";
 
     /**
      * Give authorized HTTP verbs.

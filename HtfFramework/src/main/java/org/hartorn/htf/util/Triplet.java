@@ -1,25 +1,30 @@
 package org.hartorn.htf.util;
 
 /**
- * Class representing a pair, with a left element, and a right element.
+ * Class representing a pair, with a element, middle and right element.
  *
  * @author Hartorn
  *
  * @param <L>
  *            Left element type
+ * @param <M>
+ *            Middle element type
  * @param <R>
  *            Right element type
  */
-public final class Pair<L, R> {
+public final class Triplet<L, M, R> {
 
-    private static final String LEFT = "org.hartorn.htf.util.Pair[LEFT :";
+    private static final String LEFT = "org.hartorn.htf.util.Tripler[LEFT :";
     private static final String RIGHT = " RIGHT:";
+    private static final String MIDDLE = " MIDDLE:";
     private static final char ENDCHAR = ']';
     private final L left;
+    private final M middle;
     private final R right;
 
-    private <LArg, RArg> Pair(final L leftArg, final R rightArg) {
+    private Triplet(final L leftArg, final M middleArg, final R rightArg) {
         this.left = leftArg;
+        this.middle = middleArg;
         this.right = rightArg;
     }
 
@@ -28,23 +33,22 @@ public final class Pair<L, R> {
      *
      * @param <R>
      *            the right element type
+     * @param <M>
+     *            the middle element type
      * @param <L>
      *            the left element type
      * @param leftArg
      *            the left element
+     * @param middleArg
+     *            the middle element
      * @param rightArg
      *            the right element
      * @return the pair created with both elements.
      */
-    public static <L, R> Pair<L, R> of(final L leftArg, final R rightArg) {
-        return new Pair<L, R>(leftArg, rightArg);
+    public static <L, M, R> Triplet<L, M, R> of(final L leftArg, final M middleArg, final R rightArg) {
+        return new Triplet<L, M, R>(leftArg, middleArg, rightArg);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
@@ -56,34 +60,37 @@ public final class Pair<L, R> {
         if (this.getClass() != obj.getClass()) {
             return false;
         }
-        final Pair<?, ?> other = (Pair<?, ?>) obj;
-        if (this.left() == null) {
-            if (other.left() != null) {
+        final Triplet<?, ?, ?> other = (Triplet<?, ?, ?>) obj;
+        if (this.left == null) {
+            if (other.left != null) {
                 return false;
             }
-        } else if (!this.left().equals(other.left())) {
+        } else if (!this.left.equals(other.left)) {
             return false;
         }
-        if (this.right() == null) {
-            if (other.right() != null) {
+        if (this.middle == null) {
+            if (other.middle != null) {
                 return false;
             }
-        } else if (!this.right().equals(other.right())) {
+        } else if (!this.middle.equals(other.middle)) {
+            return false;
+        }
+        if (this.right == null) {
+            if (other.right != null) {
+                return false;
+            }
+        } else if (!this.right.equals(other.right)) {
             return false;
         }
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = (prime * result) + ((this.left == null) ? 0 : this.left.hashCode());
+        result = (prime * result) + ((this.middle == null) ? 0 : this.middle.hashCode());
         result = (prime * result) + ((this.right == null) ? 0 : this.right.hashCode());
         return result;
     }
@@ -95,6 +102,15 @@ public final class Pair<L, R> {
      */
     public L left() {
         return this.left;
+    }
+
+    /**
+     * Return the middle element of the pair.
+     *
+     * @return the middle element of the pair.
+     */
+    public M middle() {
+        return this.middle;
     }
 
     /**
@@ -113,11 +129,13 @@ public final class Pair<L, R> {
      */
     @Override
     public String toString() {
-        final StringBuilder message = new StringBuilder(Pair.LEFT);
+        final StringBuilder message = new StringBuilder(Triplet.LEFT);
         message.append(StringUtil.stringify(this.left()));
-        message.append(Pair.RIGHT);
+        message.append(Triplet.MIDDLE);
+        message.append(StringUtil.stringify(this.middle()));
+        message.append(Triplet.RIGHT);
         message.append(StringUtil.stringify(this.right()));
-        message.append(Pair.ENDCHAR);
+        message.append(Triplet.ENDCHAR);
         return message.toString();
     }
 

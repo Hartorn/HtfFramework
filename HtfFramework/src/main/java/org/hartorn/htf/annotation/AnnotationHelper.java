@@ -44,6 +44,24 @@ public enum AnnotationHelper {
     }
 
     /**
+     * Check if the annotation array contains one annotation of the given class.
+     *
+     * @param annotations
+     *            the array of annotations
+     * @param annotationClass
+     *            the class of searched annotation
+     * @return true if it contains an annotation of this class, else false
+     */
+    public static boolean containsAnnotation(final Annotation[] annotations, final Class<? extends Annotation> annotationClass) {
+        for (final Annotation annotation : annotations) {
+            if (annotationClass.equals(annotation.annotationType())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Get the set of all the indexed class with the annotation.
      *
      * @param annotationClass
@@ -80,6 +98,40 @@ public enum AnnotationHelper {
             }
         }
         return Collections.unmodifiableList(annotatedMethods);
+    }
+
+    /**
+     * Return the number of first dimension array containing an annotation of the given class.
+     *
+     * @param paramAnnotations
+     *            a matrix of annotation
+     * @param annotationClass
+     *            an annotation class to look for
+     * @return the number of first dimension array containing an annotation of the given class
+     */
+    public static int getNumberOfAnnotatedParameters(final Annotation[][] paramAnnotations, final Class<? extends Annotation> annotationClass) {
+        int nbAnnotations = 0;
+        // Looking for each parameter
+        for (final Annotation[] annotationArray : paramAnnotations) {
+            // Looking through annotations of the parameter
+            if (AnnotationHelper.containsAnnotation(annotationArray, annotationClass)) {
+                nbAnnotations++;
+            }
+        }
+        return nbAnnotations;
+    }
+
+    /**
+     * Return the number of parameters with the given annotation.
+     * 
+     * @param toCheck
+     *            the method to check
+     * @param annotationClass
+     *            the annotation to look for
+     * @return the number of parameters with the given annotation
+     */
+    public static int getNumberOfAnnotatedParameters(final Method toCheck, final Class<? extends Annotation> annotationClass) {
+        return AnnotationHelper.getNumberOfAnnotatedParameters(toCheck.getParameterAnnotations(), annotationClass);
     }
 
     /**

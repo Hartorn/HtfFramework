@@ -14,7 +14,6 @@ public enum StringUtil {
     public static final String EMPTY = "";
 
     private static final String NULL = "null";
-    private static final String SLASH = "/";
 
     private StringUtil() {
         // helper, private constructor
@@ -63,28 +62,49 @@ public enum StringUtil {
     }
 
     /**
-     * Function stripping "/", at the beginning and at the end of the string.
+     * Function stripping the given character, at the beginning and at the end of the string.
      *
-     * @param urlPart
+     * @param toStrip
      *            the string to strip
+     *
+     * @param character
+     *            the character to strip
+     *
      * @return the stripped string
      */
-    public static String stripSlash(final String urlPart) {
-        final String url = StringUtil.emptyIfNull(urlPart).trim().toLowerCase();
+    public static String strip(final String toStrip, final char character) {
+        final String stringChar = String.valueOf(character);
+        final String url = StringUtil.emptyIfNull(toStrip).trim();
         if (url.isEmpty()) {
             return url;
         }
         int beginIndex = 0;
-        int endIndex = urlPart.length();
+        int endIndex = url.length();
         // Remove the slash, if begin with slash
-        if (url.startsWith(StringUtil.SLASH)) {
+        if (url.startsWith(stringChar)) {
             beginIndex = Math.min(beginIndex + 1, url.length() - 1);
         }
         // Remove the slash at the end, if end with slash
-        if (url.endsWith(StringUtil.SLASH)) {
+        if (url.endsWith(stringChar)) {
             endIndex = Math.max(1, endIndex - 1);
         }
 
         return url.substring(beginIndex, endIndex);
+    }
+
+    /**
+     * Function stripping the given character, at the beginning and at the end of the string.
+     *
+     * @param toStrip
+     *            the string to strip
+     *
+     * @param character
+     *            the character to strip
+     *
+     * @return the stripped string
+     */
+    public static String stripAndToLower(final String toStrip, final char character) {
+
+        return StringUtil.strip(toStrip, character).toLowerCase();
     }
 }
