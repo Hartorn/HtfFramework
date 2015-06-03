@@ -1,6 +1,7 @@
 package org.eclipse.wtp.tutorial;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,6 +24,18 @@ import org.hartorn.htf.handler.request.JsonResponse;
  */
 @HtfController(address = "/test/bla")
 public final class TestServlet extends HttpServlet {
+    public class Bidule {
+        BigInteger d;
+        BigDecimal e;
+        List<String> f;
+    }
+
+    public class Machin {
+        Integer a;
+        BigDecimal b;
+        String c;
+    }
+
     public class Truc {
         Integer num;
         BigDecimal sum;
@@ -106,5 +119,24 @@ public final class TestServlet extends HttpServlet {
         trucList.add(trucMuche);
 
         return new JsonResponse<List<Truc>>(trucList);
+    }
+
+    @HtfMethod(address = "/test8", httpVerbs = { HttpVerbs.GET, HttpVerbs.POST })
+    public HtfResponse test8(final Bidule bidule, final Collection<Truc> bla, final Machin machin) {
+        for (final Truc truc : bla) {
+            System.out.println("num:" + String.valueOf(truc.num));
+            System.out.println("bla:" + String.valueOf(truc.bla));
+            System.out.println("sum:" + String.valueOf(truc.sum));
+            System.out.println();
+        }
+        final List<Truc> trucList = new ArrayList<Truc>();
+        trucList.addAll(bla);
+        bidule.f = new ArrayList<String>();
+        bidule.f.add("Un");
+        bidule.f.add("deux");
+        bidule.f.add("trois");
+        bidule.e = new BigDecimal(1000002534.65);
+        bidule.d = new BigInteger("1500000000000000000000");
+        return new JsonResponse<Bidule>(bidule);
     }
 }
