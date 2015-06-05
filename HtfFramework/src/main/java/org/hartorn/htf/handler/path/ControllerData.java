@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hartorn.htf.annotation.HtfMethod.HttpVerbs;
+import org.hartorn.htf.annotation.HttpVerbs;
 import org.hartorn.htf.exception.ImplementationException;
 import org.hartorn.htf.util.Pair;
 

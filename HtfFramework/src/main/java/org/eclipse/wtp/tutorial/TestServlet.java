@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServlet;
 import org.hartorn.htf.annotation.FromUrl;
 import org.hartorn.htf.annotation.HtfController;
 import org.hartorn.htf.annotation.HtfMethod;
-import org.hartorn.htf.annotation.HtfMethod.HttpVerbs;
+import org.hartorn.htf.annotation.HttpVerbs;
 import org.hartorn.htf.handler.request.DebugResponse;
 import org.hartorn.htf.handler.request.HtfResponse;
 import org.hartorn.htf.handler.request.JsonResponse;

@@ -15,7 +15,7 @@ import org.hartorn.htf.annotation.AnnotationHelper;
 import org.hartorn.htf.annotation.FromUrl;
 import org.hartorn.htf.annotation.HtfController;
 import org.hartorn.htf.annotation.HtfMethod;
-import org.hartorn.htf.annotation.HtfMethod.HttpVerbs;
+import org.hartorn.htf.annotation.HttpVerbs;
 import org.hartorn.htf.exception.ImplementationException;
 import org.hartorn.htf.handler.request.HtfResponse;
 import org.hartorn.htf.util.Pair;
