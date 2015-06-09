@@ -1,4 +1,5 @@
-# HtfFramework
+# HTF
+HTF - Hartorn's Framework (core part)
 Java Framework for Web development
 
 This project aims at making available a light and easy to use framework for Web Application in Java.

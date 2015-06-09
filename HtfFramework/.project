@@ -19,8 +19,12 @@
     <buildCommand>
       <name>net.sf.eclipsecs.core.CheckstyleBuilder</name>
     </buildCommand>
+    <buildCommand>
+      <name>org.eclipse.m2e.core.maven2Builder</name>
+    </buildCommand>
   </buildSpec>
   <natures>
+    <nature>org.eclipse.m2e.core.maven2Nature</nature>
     <nature>org.eclipse.jem.workbench.JavaEMFNature</nature>
     <nature>org.eclipse.wst.common.modulecore.ModuleCoreNature</nature>
     <nature>org.eclipse.jdt.core.javanature</nature>

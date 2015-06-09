@@ -40,6 +40,19 @@ public enum HtfRequestHandler {
         // Private constructor.
     }
 
+    /**
+     * Invoke the method on the given controller, with the given arguments. Also handle the user exception.
+     *
+     * @param controller
+     *            the controller
+     * @param method
+     *            the method
+     * @param methodParams
+     *            the arguments of the given method
+     * @return the build HtfResponse
+     * @throws ImplementationException
+     *             the exception happened (can be unchecked exception caught)
+     */
     public static HtfResponse getHtfResponse(final Object controller, final Method method, final Object... methodParams)
             throws ImplementationException {
         HtfRequestHandler.LOG.debug("HTF - Invoking controller [{}] with method [{}]", controller.getClass().getCanonicalName(), method.getName());
@@ -58,6 +71,17 @@ public enum HtfRequestHandler {
         }
     }
 
+    /**
+     * Extract the parameters from the request, for all handled content type.
+     * 
+     * @param method
+     *            the method for which the parameters are extracted from the request
+     * @param request
+     *            the received request
+     * @return the paramters for the method
+     * @throws ImplementationException
+     *             Technical exception, from extracting the parameters (mainly IOException)
+     */
     public static Object[] getMethodParametersFromRequest(final Method method, final HttpServletRequest request) throws ImplementationException {
         Object[] params;
         try {
@@ -87,6 +111,17 @@ public enum HtfRequestHandler {
         }
     }
 
+    /**
+     * Extract the parameters from the request, if sent in JSON.
+     *
+     * @param method
+     *            the method for which the arguments are extracted
+     * @param request
+     *            the request received
+     * @return the parameters for the methods
+     * @throws ImplementationException
+     *             Technical Exception, wrapping IOException
+     */
     private static Object[] getMethodParametersFromJsonRequest(final Method method, final HttpServletRequest request) throws ImplementationException {
         final Type[] paramTypes = method.getGenericParameterTypes();
         // If no parameters, no parse or anything

@@ -17,13 +17,14 @@ import org.hartorn.htf.exception.ImplementationException;
  * @author Hartorn
  */
 public final class FileResponse implements HtfResponse {
-    private final static Tika CONTENT_DETECTOR = new Tika();
+    private static final Tika CONTENT_DETECTOR = new Tika();
     private final File toDownload;
 
     /**
      * Constructor.
      *
-     * @param file the file to send in the answer
+     * @param file
+     *            the file to send in the answer
      */
     public FileResponse(final File file) {
         this.toDownload = file;
