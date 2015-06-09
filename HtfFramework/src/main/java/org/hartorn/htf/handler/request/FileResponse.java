@@ -14,7 +14,6 @@ import org.hartorn.htf.exception.ImplementationException;
 /**
  * This response build the File response for the given request, returning file given in constructor.
  *
- *
  * @author Hartorn
  */
 public final class FileResponse implements HtfResponse {
@@ -24,8 +23,7 @@ public final class FileResponse implements HtfResponse {
     /**
      * Constructor.
      *
-     * @param file
-     *            the file to send in the answer
+     * @param file the file to send in the answer
      */
     public FileResponse(final File file) {
         this.toDownload = file;

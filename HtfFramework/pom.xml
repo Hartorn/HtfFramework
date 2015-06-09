@@ -3,91 +3,96 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.bitbucket.hartorn</groupId>
 	<artifactId>htf</artifactId>
+	<name>Hartorn's Framework</name>
+	<url>https://github.com/Hartorn/HtfFramework</url>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<build>
-		<plugins>
-			<!-- Maven Ant Run : task used for generating source -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.8</version>
-				<executions>
-					<execution>
-						<id>generate-sources</id>
-						<phase>generate-sources</phase>
-						<configuration>
-							<target>
-								<!-- defining ant structure -->
-								<property name="ant" location="${basedir}/ant" />
-								<!-- Defining src structure -->
-								<property name="src" location="${basedir}/src" />
-								<!-- defining the database-related properties -->
-								<property name="database.name" value="postgresql" />
-								<property name="database.model" location="${basedir}/dbModel" />
-								<property name="database.model.xmlmodel" location="${database.model}/test.xml" />
-								<property name="database.model.mapping" location="${database.model}/mapping/${database.name}.properties" />
+		<pluginManagement>
+			<plugins>
+				<!-- Maven Ant Run : task used for generating source -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>1.8</version>
+					<executions>
+						<execution>
+							<id>generate-sources</id>
+							<phase>generate-sources</phase>
+							<configuration>
+								<target>
+									<!-- defining ant structure -->
+									<property name="ant" location="${basedir}/ant" />
+									<!-- Defining src structure -->
+									<property name="src" location="${basedir}/src" />
+									<!-- defining the database-related properties -->
+									<property name="database.name" value="postgresql" />
+									<property name="database.model" location="${basedir}/dbModel" />
+									<property name="database.model.xmlmodel" location="${database.model}/test.xml" />
+									<property name="database.model.mapping"
+										location="${database.model}/mapping/${database.name}.properties" />
 
-								<ant antfile="${ant}/build.xml">
-									<target name="generate" />
-								</ant>
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>org.apache.ant</groupId>
-						<artifactId>ant</artifactId>
-						<version>1.9.4</version>
-					</dependency>
-					<dependency>
-						<groupId>ant-contrib</groupId>
-						<artifactId>ant-contrib</artifactId>
-						<version>1.0b3</version>
-					</dependency>
-					<dependency>
-						<groupId>com.googlecode.fmpp-maven-plugin</groupId>
-						<artifactId>fmpp-maven-plugin</artifactId>
-						<version>1.0</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-			<!-- Maven Compiler : task used for compiling java classes -->
+									<ant antfile="${ant}/build.xml">
+										<target name="generate" />
+									</ant>
+								</target>
+							</configuration>
+							<goals>
+								<goal>run</goal>
+							</goals>
+						</execution>
+					</executions>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.ant</groupId>
+							<artifactId>ant</artifactId>
+							<version>1.9.4</version>
+						</dependency>
+						<dependency>
+							<groupId>ant-contrib</groupId>
+							<artifactId>ant-contrib</artifactId>
+							<version>1.0b3</version>
+						</dependency>
+						<dependency>
+							<groupId>com.googlecode.fmpp-maven-plugin</groupId>
+							<artifactId>fmpp-maven-plugin</artifactId>
+							<version>1.0</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+				<!-- Maven Compiler : task used for compiling java classes -->
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.3</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-					<!-- <annotationProcessors> -->
-					<!-- <annotationProcessor> -->
-					<!-- org.atteo.classindex.processor.ClassIndexProcessor -->
-					<!-- </annotationProcessor> -->
-					<!-- </annotationProcessors> -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.3</version>
+					<configuration>
+						<source>1.8</source>
+						<target>1.8</target>
+						<!-- <annotationProcessors> -->
+						<!-- <annotationProcessor> -->
+						<!-- org.atteo.classindex.processor.ClassIndexProcessor -->
+						<!-- </annotationProcessor> -->
+						<!-- </annotationProcessors> -->
 
-					<useIncrementalCompilation>false</useIncrementalCompilation>
-					<showWarnings>true</showWarnings>
-					<showDeprecation>true></showDeprecation>
-					<!-- <proc>only</proc> -->
-					<!-- <compilerArgument>-proc:none</compilerArgument> -->
-				</configuration>
-			</plugin>
-			<!-- Maven Tomcat Plugin -->
-			<plugin>
-				<groupId>org.apache.tomcat.maven</groupId>
-				<artifactId>tomcat7-maven-plugin</artifactId>
-				<version>2.2</version>
-				<!-- <configuration> -->
-				<!-- <path>/${project.build.finalName}</path> -->
-				<!-- </configuration> -->
-			</plugin>
-		</plugins>
+						<useIncrementalCompilation>false</useIncrementalCompilation>
+						<showWarnings>true</showWarnings>
+						<showDeprecation>true></showDeprecation>
+						<!-- <proc>only</proc> -->
+						<!-- <compilerArgument>-proc:none</compilerArgument> -->
+					</configuration>
+				</plugin>
+				<!-- Maven Tomcat Plugin -->
+				<plugin>
+					<groupId>org.apache.tomcat.maven</groupId>
+					<artifactId>tomcat7-maven-plugin</artifactId>
+					<version>2.2</version>
+					<!-- <configuration> -->
+					<!-- <path>/${project.build.finalName}</path> -->
+					<!-- </configuration> -->
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 	<dependencies>
 		<dependency>
@@ -115,6 +120,11 @@
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
 			<version>2.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-core</artifactId>
+			<version>1.8</version>
 		</dependency>
 
 	</dependencies>
