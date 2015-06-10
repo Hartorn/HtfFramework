@@ -7,7 +7,7 @@
 	<name>Hartorn's Framework (Core)</name>
 	<url>https://github.com/Hartorn/htf-core</url>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 
 	<parent>
 		<groupId>com.github.hartorn</groupId>
