@@ -33,6 +33,8 @@ public interface HtfTree<D extends Addable<D>> {
      *            the path (starting with path separator character)
      * @param data
      *            the data
+     * @throws ImplementationException
+     *             Technical Exception
      */
     void registerData(final String nodePath, final D data) throws ImplementationException;
 

@@ -26,6 +26,8 @@ public interface HtfNode<D> {
      *
      * @param data
      *            the D data to set
+     * @throws ImplementationException
+     *             Technical Exception
      */
     void addData(final D data) throws ImplementationException;
 

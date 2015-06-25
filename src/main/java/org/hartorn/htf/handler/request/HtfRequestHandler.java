@@ -1,5 +1,6 @@
 package org.hartorn.htf.handler.request;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.annotation.Annotation;
@@ -7,9 +8,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,8 +22,10 @@ import org.hartorn.htf.annotation.FromUrl;
 import org.hartorn.htf.exception.ImplementationException;
 import org.hartorn.htf.exception.NotYetImplementedException;
 import org.hartorn.htf.exception.UserException;
+import org.hartorn.htf.file.HtfFile;
 import org.hartorn.htf.handler.path.UrlResolver;
-import org.hartorn.htf.util.JsonHelper;
+import org.hartorn.htf.util.JsonUtil;
+import org.hartorn.htf.util.Pair;
 import org.hartorn.htf.util.StringUtil;
 
 import com.google.gson.JsonArray;
@@ -35,6 +41,11 @@ import com.google.gson.JsonParser;
 public enum HtfRequestHandler {
     ;
     private static final Logger LOG = LogManager.getLogger();
+    private static final String TMP_FOLDER_PATH = System.getProperty("java.io.tmpdir") + File.separator + "HTF";
+    private static final File TMP_FOLDER = new File(HtfRequestHandler.TMP_FOLDER_PATH);
+    static {
+        HtfRequestHandler.TMP_FOLDER.mkdirs();
+    }
 
     private HtfRequestHandler() {
         // Private constructor.
@@ -73,7 +84,7 @@ public enum HtfRequestHandler {
 
     /**
      * Extract the parameters from the request, for all handled content type.
-     * 
+     *
      * @param method
      *            the method for which the parameters are extracted from the request
      * @param request
@@ -83,13 +94,14 @@ public enum HtfRequestHandler {
      *             Technical exception, from extracting the parameters (mainly IOException)
      */
     public static Object[] getMethodParametersFromRequest(final Method method, final HttpServletRequest request) throws ImplementationException {
-        Object[] params;
+        Object[] params = null;
         try {
             // 2 - Identify Content type, and build basics arguments
             switch (StringUtil.emptyIfNull(request.getContentType())) {
-                case "":
-                    // fallthrough
+                case StringUtil.EMPTY:
                     // Case of GET and DELETE
+                    // TODO resolve url params
+                    break;
                 case "application/json":
                     params = HtfRequestHandler.getMethodParametersFromJsonRequest(method, request);
                     break;
@@ -107,8 +119,25 @@ public enum HtfRequestHandler {
     private static void addAllParameters(final List<Object> params, final Type[] paramTypes, final String[] pathParts) {
         for (int indexParam = 0; indexParam < paramTypes.length; indexParam++) {
             final Type type = paramTypes[indexParam];
-            params.add(JsonHelper.getPrimitiveObjectFromString(pathParts[paramTypes.length - 1 - indexParam], type));
+            params.add(JsonUtil.getPrimitiveObjectFromString(pathParts[paramTypes.length - 1 - indexParam], type));
         }
+    }
+
+    private static List<Pair<String, HtfFile>> extractFilesFromRequest(final HttpServletRequest request) throws ImplementationException {
+        final List<Pair<String, HtfFile>> fileList = new ArrayList<Pair<String, HtfFile>>();
+
+        Collection<Part> fileParts;
+        try {
+            fileParts = request.getParts();
+        } catch (final IOException | ServletException e) {
+            throw new ImplementationException(e);
+        }
+
+        for (final Part filePart : fileParts) {
+            fileList.add(Pair.of(filePart.getName(), new HtfFile(filePart)));
+        }
+
+        return fileList;
     }
 
     /**
@@ -161,7 +190,7 @@ public enum HtfRequestHandler {
                         if (nbUrlParams > paramTypes.length) {
                             throw new ImplementationException("Too many parameters from url");
                         }
-                        params.add(JsonHelper.getPrimitiveObjectFromString(pathParts[offset + nbUrlParams], type));
+                        params.add(JsonUtil.getPrimitiveObjectFromString(pathParts[offset + nbUrlParams], type));
                         nbUrlParams++;
                     } else {
                         // Else the parameter is from the request body
@@ -171,10 +200,10 @@ public enum HtfRequestHandler {
                             throw new ImplementationException("Too many method parameters : only one Json object >" + jsonTree.toString());
                         } else if (!jsonTree.isJsonArray() || ((paramTypes.length - nbAnnotatedParams) == 1)) {
                             // Get unique parameter (or else exception for next one)
-                            params.add(JsonHelper.getObjectFromJsonElement(jsonTree, type));
+                            params.add(JsonUtil.getObjectFromJsonElement(jsonTree, type));
                         } else {
                             final JsonArray jsonArray = (JsonArray) jsonTree;
-                            params.add(JsonHelper.getObjectFromJsonElement(jsonArray.get(nbRqParams), type));
+                            params.add(JsonUtil.getObjectFromJsonElement(jsonArray.get(nbRqParams), type));
                         }
                         nbRqParams++;
                     }

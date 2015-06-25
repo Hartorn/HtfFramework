@@ -19,11 +19,11 @@ import com.google.gson.stream.JsonWriter;
  * @author Hartorn
  *
  */
-public enum JsonHelper {
+public enum JsonUtil {
     ;
-    private static final Gson GSON = JsonHelper.newGson();
+    private static final Gson GSON = JsonUtil.newGson();
 
-    private JsonHelper() {
+    private JsonUtil() {
         // private constructor, for helper class.
     }
 
@@ -37,7 +37,7 @@ public enum JsonHelper {
      * @return the new object
      */
     public static Object getObjectFromJsonElement(final JsonElement jsonElt, final Type type) {
-        return JsonHelper.GSON.fromJson(jsonElt, type);
+        return JsonUtil.GSON.fromJson(jsonElt, type);
     }
 
     /**
@@ -50,7 +50,7 @@ public enum JsonHelper {
      * @return the new object
      */
     public static Object getPrimitiveObjectFromString(final String json, final Type type) {
-        return JsonHelper.GSON.fromJson(new JsonPrimitive(json), type);
+        return JsonUtil.GSON.fromJson(new JsonPrimitive(json), type);
     }
 
     /**
@@ -60,7 +60,7 @@ public enum JsonHelper {
      *            the given object
      * @param response
      *            the response
-     * 
+     *
      * @param <D>
      *            type of the object (including generics)
      * @throws ImplementationException
@@ -70,7 +70,7 @@ public enum JsonHelper {
         try (JsonWriter jsonWriter = new JsonWriter(response.getWriter())) {
             final Type answerType = new TypeToken<D>() {
             }.getType();
-            JsonHelper.GSON.toJson(object, answerType, jsonWriter);
+            JsonUtil.GSON.toJson(object, answerType, jsonWriter);
         } catch (final IOException e) {
             throw new ImplementationException(e);
         }

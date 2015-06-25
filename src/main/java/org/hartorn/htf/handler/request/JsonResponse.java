@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hartorn.htf.exception.ImplementationException;
-import org.hartorn.htf.util.JsonHelper;
+import org.hartorn.htf.util.JsonUtil;
 
 /**
  * This response build the JSON response for the given request, returning the objects given in constructor.
@@ -31,7 +31,7 @@ public final class JsonResponse<D> implements HtfResponse {
     @Override
     public void doWriteResponse(final HttpServletRequest request, final HttpServletResponse response) throws ImplementationException {
         response.setContentType("application/json");
-        JsonHelper.writeObjectToResponse(this.toSerialize, response);
+        JsonUtil.writeObjectToResponse(this.toSerialize, response);
     }
 
 }

@@ -17,11 +17,6 @@ public enum HttpVerbs {
      */
     GET,
     /**
-     * HEAD : Verb, identical as GET, but no message-body in the response (same HTTP Headers as for GET). Used for getting meta-information, or for
-     * testing hypertext links for validity, accessibility, and recent modification.
-     */
-    HEAD,
-    /**
      * POST : Verb used in REST to create an object (data in BODY).
      */
     POST,

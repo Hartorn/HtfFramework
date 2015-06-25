@@ -110,15 +110,16 @@ public final class UrlResolver {
         } else {
             throw new ImplementationException("HTF - ControllerData with null attribute");
         }
+        // Checking if method can be resolved with the given verb
+        if (result == null) {
+            throw new ImplementationException("HTF - Method cannot be invoked with given verb");
+        }
+        // Checking if url leftovers are due to UrlParams, or bad resolutions
         final int nbAnnotations = AnnotationHelper.getNumberOfAnnotatedParameters(result.right(), FromUrl.class);
         if (nbAnnotations != leftUrl.length) {
             throw new ImplementationException("HTF - Cannot resolve url");
         }
-        final Pair<Class<?>, Method> toReturn = ctrlData.getControllerMethodPair(verb);
-        if (toReturn == null) {
-            throw new ImplementationException("HTF - Method cannot be invoked with given verb");
-        }
-        return toReturn;
+        return result;
     }
 
     private Object getControllerInstance(final Class<?> controllerClass) throws ImplementationException {

@@ -32,7 +32,6 @@ public final class HtfServlet extends HttpServlet {
      */
     private static final long serialVersionUID = -6533912768946164886L;
     private static final Logger LOG = LogManager.getLogger();
-
     private static final String SERVLET_INFO = "HtfRequestHandler, part of Htf Framework (author Hartorn)";
 
     private UrlResolver pathResolver;
@@ -46,7 +45,7 @@ public final class HtfServlet extends HttpServlet {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.servlet.GenericServlet#getServletInfo()
      */
     @Override
@@ -56,7 +55,7 @@ public final class HtfServlet extends HttpServlet {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.servlet.GenericServlet#init()
      */
     @Override
@@ -69,12 +68,13 @@ public final class HtfServlet extends HttpServlet {
         } catch (final ImplementationException e) {
             throw new ServletException(e);
         }
+
         HtfServlet.LOG.info("HTF - Initialisation finished");
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.servlet.http.HttpServlet#doDelete(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
      */
     @Override
@@ -84,7 +84,7 @@ public final class HtfServlet extends HttpServlet {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
      */
     @Override
@@ -94,17 +94,7 @@ public final class HtfServlet extends HttpServlet {
 
     /*
      * (non-Javadoc)
-     * 
-     * @see javax.servlet.http.HttpServlet#doHead(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
-     */
-    @Override
-    protected void doHead(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        this.doHandleRequest(HttpVerbs.HEAD, req, resp);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
+     *
      * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
      */
     @Override
@@ -114,7 +104,7 @@ public final class HtfServlet extends HttpServlet {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
      */
     @Override
@@ -123,7 +113,7 @@ public final class HtfServlet extends HttpServlet {
     }
 
     private void doHandleRequest(final HttpVerbs verb, final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-    IOException {
+            IOException {
         try {
             this.handleRequest(verb, req, resp);
         } catch (final ImplementationException e) {
