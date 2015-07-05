@@ -17,48 +17,48 @@
 		<pluginManagement>
 			<plugins>
 				<!-- Maven Ant Run : task used for generating source -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-antrun-plugin</artifactId>
-					<executions>
-						<execution>
-							<id>generate-sources</id>
-							<phase>generate-sources</phase>
-							<configuration>
-								<target>
-									<!-- defining ant structure -->
-									<property name="ant" location="${basedir}/ant" />
-									<!-- Defining src structure -->
-									<property name="src" location="${basedir}/src" />
-									<!-- defining the database-related properties -->
-									<property name="database.name" value="postgresql" />
-									<property name="database.model" location="${basedir}/dbModel" />
-									<property name="database.model.xmlmodel" location="${database.model}/test.xml" />
-									<property name="database.model.mapping"
-										location="${database.model}/mapping/${database.name}.properties" />
+<!-- 				<plugin> -->
+<!-- 					<groupId>org.apache.maven.plugins</groupId> -->
+<!-- 					<artifactId>maven-antrun-plugin</artifactId> -->
+<!-- 					<executions> -->
+<!-- 						<execution> -->
+<!-- 							<id>generate-sources</id> -->
+<!-- 							<phase>generate-sources</phase> -->
+<!-- 							<configuration> -->
+<!-- 								<target> -->
+<!-- 									defining ant structure -->
+<!-- 									<property name="ant" location="${basedir}/ant" /> -->
+<!-- 									Defining src structure -->
+<!-- 									<property name="src" location="${basedir}/src" /> -->
+<!-- 									defining the database-related properties -->
+<!-- 									<property name="database.name" value="postgresql" /> -->
+<!-- 									<property name="database.model" location="${basedir}/dbModel" /> -->
+<!-- 									<property name="database.model.xmlmodel" location="${database.model}/test.xml" /> -->
+<!-- 									<property name="database.model.mapping" -->
+<!-- 										location="${database.model}/mapping/${database.name}.properties" /> -->
 
-									<ant antfile="${ant}/build.xml">
-										<target name="generate" />
-									</ant>
-								</target>
-							</configuration>
-							<goals>
-								<goal>run</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
+<!-- 									<ant antfile="${ant}/build.xml"> -->
+<!-- 										<target name="generate" /> -->
+<!-- 									</ant> -->
+<!-- 								</target> -->
+<!-- 							</configuration> -->
+<!-- 							<goals> -->
+<!-- 								<goal>run</goal> -->
+<!-- 							</goals> -->
+<!-- 						</execution> -->
+<!-- 					</executions> -->
+<!-- 				</plugin> -->
 				<!-- Maven Compiler : task used for compiling java classes -->
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 				</plugin>
-				<!-- Maven Tomcat Plugin -->
-				<plugin>
-					<groupId>org.apache.tomcat.maven</groupId>
-					<artifactId>tomcat7-maven-plugin</artifactId>
-				</plugin>
+<!-- 				Maven Tomcat Plugin -->
+<!-- 				<plugin> -->
+<!-- 					<groupId>org.apache.tomcat.maven</groupId> -->
+<!-- 					<artifactId>tomcat7-maven-plugin</artifactId> -->
+<!-- 				</plugin> -->
 			</plugins>
 		</pluginManagement>
 	</build>
