@@ -32,7 +32,7 @@ public final class HtfServlet extends HttpServlet {
      */
     private static final long serialVersionUID = -6533912768946164886L;
     private static final Logger LOG = LogManager.getLogger();
-    private static final String SERVLET_INFO = "HtfRequestHandler, part of Htf Framework (author Hartorn)";
+    private static final String SERVLET_INFO = "HtfServlet, part of Htf Framework (author Hartorn)";
 
     private UrlResolver pathResolver;
 
@@ -45,7 +45,7 @@ public final class HtfServlet extends HttpServlet {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see javax.servlet.GenericServlet#getServletInfo()
      */
     @Override
@@ -55,7 +55,7 @@ public final class HtfServlet extends HttpServlet {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see javax.servlet.GenericServlet#init()
      */
     @Override
@@ -74,7 +74,7 @@ public final class HtfServlet extends HttpServlet {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see javax.servlet.http.HttpServlet#doDelete(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
      */
     @Override
@@ -84,7 +84,7 @@ public final class HtfServlet extends HttpServlet {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
      */
     @Override
@@ -94,7 +94,7 @@ public final class HtfServlet extends HttpServlet {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
      */
     @Override
@@ -104,7 +104,7 @@ public final class HtfServlet extends HttpServlet {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
      */
     @Override
@@ -113,7 +113,7 @@ public final class HtfServlet extends HttpServlet {
     }
 
     private void doHandleRequest(final HttpVerbs verb, final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-            IOException {
+    IOException {
         try {
             this.handleRequest(verb, req, resp);
         } catch (final ImplementationException e) {

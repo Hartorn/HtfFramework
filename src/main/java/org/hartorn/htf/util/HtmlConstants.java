@@ -30,6 +30,17 @@ public enum HtmlConstants {
             this.contentType = contentTypeArg;
         }
 
+        /**
+         * Tell if the given content type is the enum one.
+         *
+         * @param content
+         *            the strign to test
+         * @return true if it is the given content, else false
+         */
+        public final boolean isContentType(final String content) {
+            return this.contentType.equalsIgnoreCase(content);
+        }
+
         @Override
         public final String toString() {
             return this.contentType;

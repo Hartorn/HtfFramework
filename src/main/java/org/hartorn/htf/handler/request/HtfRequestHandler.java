@@ -24,6 +24,7 @@ import org.hartorn.htf.exception.NotYetImplementedException;
 import org.hartorn.htf.exception.UserException;
 import org.hartorn.htf.file.HtfFile;
 import org.hartorn.htf.handler.path.UrlResolver;
+import org.hartorn.htf.util.HtmlConstants;
 import org.hartorn.htf.util.JsonUtil;
 import org.hartorn.htf.util.Pair;
 import org.hartorn.htf.util.StringUtil;
@@ -89,24 +90,21 @@ public enum HtfRequestHandler {
      *            the method for which the parameters are extracted from the request
      * @param request
      *            the received request
-     * @return the paramters for the method
+     * @return the parameters for the method
      * @throws ImplementationException
      *             Technical exception, from extracting the parameters (mainly IOException)
      */
     public static Object[] getMethodParametersFromRequest(final Method method, final HttpServletRequest request) throws ImplementationException {
         Object[] params = null;
+        final String contentType = StringUtil.emptyIfNull(request.getContentType());
         try {
             // 2 - Identify Content type, and build basics arguments
-            switch (StringUtil.emptyIfNull(request.getContentType())) {
-                case StringUtil.EMPTY:
-                    // Case of GET and DELETE
-                    // TODO resolve url params
-                    break;
-                case "application/json":
-                    params = HtfRequestHandler.getMethodParametersFromJsonRequest(method, request);
-                    break;
-                default:
-                    throw new ImplementationException("Cannot handle this kind of content type " + request.getContentType());
+            if (StringUtil.EMPTY.equals(contentType)) {
+                // Nothing to do
+            } else if (HtmlConstants.ContentType.JSON.isContentType(contentType)) {
+                params = HtfRequestHandler.getMethodParametersFromJsonRequest(method, request);
+            } else {
+                throw new ImplementationException("Cannot handle this kind of content type " + request.getContentType());
             }
         } catch (final RuntimeException e) {
             // From unchecked to checked Exception
